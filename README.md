@@ -49,3 +49,7 @@ Details for running BigDrive locally will be added once the project is completed
 - [Pub/Sub](https://cloud.google.com/pubsub)
 - [GKE](https://cloud.google.com/kubernetes-engine)
 - [Firebase](https://firebase.google.com/)
+
+## Contact
+
+If you find any bugs or have any questions, feel free to email me: [malav.mehta@uwaterloo.ca](mailto:malav.mehta@uwaterloo.ca).
