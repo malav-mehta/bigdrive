@@ -1,0 +1,464 @@
+swagger: "2.0"
+info:
+  title: "core-api"
+  version: "0.1.0"
+  description: "Specification for the core API of The Platform. See [github.com/malav-mehta/the-platform](https://github.com/malav-mehta/the-platform) for more information."
+host: "core-api.apigateway.dfs-drive.cloud.goog"
+basePath: "/v1"
+tags:
+  - name: "user"
+  - name: "node"
+  - name: "file"
+  - name: "fileJob"
+  - name: "shardJob"
+schemes:
+  - "https"
+paths:
+  /user:
+    post:
+      operationId: "createUser"
+      tags:
+        - "user"
+      summary: "create user"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "user"
+          description: "user object to create"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              email:
+                type: "string"
+      responses:
+        "201":
+          description: "successfully created user"
+        "400":
+          description: "invalid input"
+  /node:
+    post:
+      operationId: "registerNode"
+      security:
+        - Bearer: []
+      tags:
+        - "node"
+      summary: "registers node to current user"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "node"
+          description: "node to register"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              name:
+                type: "string"
+              committedBytes:
+                type: "integer"
+                format: "int64"
+      responses:
+        "201":
+          description: "successfully created node"
+          schema:
+            type: "object"
+            properties:
+              nodeId:
+                type: "integer"
+                format: "int64"
+        "400":
+          description: "invalid input"
+  /nodes:
+    get:
+      operationId: "listNodes"
+      security:
+        - Bearer: []
+      tags:
+        - "node"
+      summary: "list nodes hosted by current user"
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                name:
+                  type: "string"
+                committedBytes:
+                  type: "integer"
+                  format: "int64"
+                usedBytes:
+                  type: "integer"
+                  format: "int64"
+                isActive:
+                  type: "boolean"
+  /file:
+    post:
+      operationId: "uploadFile"
+      security:
+        - Bearer: []
+      tags:
+        - "file"
+      summary: "create file upload job"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "file"
+          description: "file to upload"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              name:
+                type: "string"
+      responses:
+        "201":
+          description: "successfully created upload url"
+          schema:
+            type: "object"
+            properties:
+              fileJobId:
+                type: "integer"
+                format: "int64"
+  /files:
+    get:
+      operationId: "listFiles"
+      security:
+        - Bearer: []
+      tags:
+        - "file"
+      summary: "list files uploaded by current user"
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                fileId:
+                  type: "integer"
+                  format: "int64"
+                name:
+                  type: "string"
+                sizeBytes:
+                  type: "integer"
+                  format: "int64"
+                isUploaded:
+                  type: "boolean"
+  /file/{fileId}:
+    get:
+      operationId: "downloadFile"
+      security:
+        - Bearer: []
+      tags:
+        - "file"
+      summary: "create file download job"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "path"
+          name: "fileId"
+          description: "id of the file to download"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            properties:
+              fileJobId:
+                type: "integer"
+                format: "int64"
+    delete:
+      operationId: "deleteFile"
+      security:
+        - Bearer: []
+      tags:
+        - "file"
+      summary: "create file delete job"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "path"
+          name: "fileId"
+          description: "id of the file to delete"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            properties:
+              fileJobId:
+                type: "integer"
+                format: "int64"
+  /fileJobs:
+    get:
+      operationId: "listFileJobs"
+      security:
+        - Bearer: []
+      tags:
+        - "fileJob"
+      summary: "list file jobs created by current user"
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                fileId:
+                  type: "integer"
+                  format: "int64"
+                fileName:
+                  type: "string"
+                jobType:
+                  type: "string"
+                  enum:
+                    - "upload"
+                    - "download"
+                    - "delete"
+                creationTime:
+                  type: "integer"
+                  format: "int64"
+  /fileJob/{jobId}:
+    get:
+      operationId: "getFileJobStatus"
+      security:
+        - Bearer: []
+      tags:
+        - "fileJob"
+      summary: "get file job status"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "path"
+          name: "jobId"
+          description: "id of the job to get"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            properties:
+              fileId:
+                type: "integer"
+                format: "int64"
+              jobType:
+                type: "string"
+                enum:
+                  - "upload"
+                  - "download"
+                  - "delete"
+              completedShards:
+                type: "integer"
+                format: "int64"
+              requiredShards:
+                type: "integer"
+                format: "int64"
+              isAcked:
+                type: "boolean"
+              isCompleted:
+                type: "boolean"
+              hasError:
+                type: "boolean"
+  /fileJob/{jobId}/url:
+    get:
+      operationId: "getFileJobUrl"
+      security:
+        - Bearer: []
+      tags:
+        - "fileJob"
+      summary: "get url from file job"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "path"
+          name: "jobId"
+          description: "id of the job to get url from"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            properties:
+              gcsSignedUrl:
+                type: "string"
+        "403":
+          description: "operation doesn't allow getting url"
+  /shardJob/{nodeId}:
+    get:
+      operationId: "getNextShardJob"
+      security:
+        - Bearer: []
+      tags:
+        - "shardJob"
+      summary: "get next pending shard job for current node"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "path"
+          name: "nodeId"
+          description: "id of the node to get shard job for"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            properties:
+              shardJobId:
+                type: "integer"
+                format: "int64"
+        "403":
+          description: "forbidden action"
+  /shardJob/{nodeId}/{jobId}:
+    get:
+      operationId: "getShardJobDetails"
+      security:
+        - Bearer: []
+      tags:
+        - "shardJob"
+      summary: "get shard job details"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "path"
+          name: "nodeId"
+          description: "id of the node the job belongs to"
+          required: true
+          type: "integer"
+          format: "int64"
+        - in: "path"
+          name: "jobId"
+          description: "id of the job to get"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            properties:
+              shardId:
+                type: "integer"
+                format: "int64"
+              jobType:
+                type: "string"
+                enum:
+                  - "upload"
+                  - "download"
+                  - "delete"
+        "403":
+          description: "forbidden action"
+    put:
+      operationId: "updateShardJobDetails"
+      security:
+        - Bearer: []
+      tags:
+        - "shardJob"
+      summary: "update shard job details"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "path"
+          name: "nodeId"
+          description: "id of the node the job belongs to"
+          required: true
+          type: "integer"
+          format: "int64"
+        - in: "path"
+          name: "jobId"
+          description: "id of the node to update"
+          required: true
+          type: "integer"
+          format: "int64"
+        - in: "body"
+          name: "shardJob"
+          description: "fields to update"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              isCompleted:
+                type: "boolean"
+              hasError:
+                type: "boolean"
+      responses:
+        "200":
+          description: "successful operation"
+        "400":
+          description: "invalid input"
+        "403":
+          description: "forbidden action"
+  /shardJob/{nodeId}/{jobId}/url:
+    get:
+      operationId: "getShardJobUrl"
+      security:
+        - Bearer: []
+      tags:
+        - "shardJob"
+      summary: "get url from shard job"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "path"
+          name: "nodeId"
+          description: "id of the node the job belongs to"
+          required: true
+          type: "integer"
+          format: "int64"
+        - in: "path"
+          name: "jobId"
+          description: "id of the node to update"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            properties:
+              gcsSignedUrl:
+                type: "string"
+        "403":
+          description: "operation doesn't allow getting url"
+securityDefinitions:
+  Bearer:
+    type: "apiKey"
+    name: "Authorization"
+    in: "header"
